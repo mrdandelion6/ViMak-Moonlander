@@ -16,10 +16,10 @@ enum custom_keycodes {
   ST_MACRO_8,
 };
 
-enum tap_dance_codes {
-  DANCE_0,
-  DANCE_1,
-};
+// enum tap_dance_codes {
+//   DANCE_0,
+//   DANCE_1,
+// };
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [0] = LAYOUT_moonlander(
         KC_ESCAPE, KC_1, KC_2, KC_3, KC_4, KC_5, TO(1), KC_TRANSPARENT, KC_6,
