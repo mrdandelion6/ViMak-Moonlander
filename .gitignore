@@ -4,3 +4,4 @@
 *.md5
 .build/
 build.log
+qmk_path.txt
