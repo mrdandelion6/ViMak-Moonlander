@@ -1,3 +1,4 @@
+#include "quantum.h"
 #include QMK_KEYBOARD_H
 #include "version.h"
 #define MOON_LED_LEVEL LED_LEVEL
@@ -22,6 +23,7 @@ enum custom_keycodes {
   FILES,
   SPOTIFY,
   BROWSER,
+  DISCORD,
 };
 
 enum tap_dance_codes {
@@ -157,10 +159,10 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, QK_BOOT,
 
     KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, RECORD,         CLIP,
-    KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT,
+    KC_TRANSPARENT, KC_TRANSPARENT, DISCORD,        FILES,          SPOTIFY,        KC_TRANSPARENT, KC_TRANSPARENT,
 
     KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, FUZZY_FIND,     SNIP_SCREEN,    LOCK_SYSTEM,
-    KC_TRANSPARENT, KC_TRANSPARENT, TERMINAL,       CLAUDE,     KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT,
+    KC_TRANSPARENT, KC_TRANSPARENT, TERMINAL,       CLAUDE,         BROWSER,        KC_TRANSPARENT, KC_TRANSPARENT,
 
     KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT,
     KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT,
@@ -242,6 +244,13 @@ bool rgb_matrix_indicators_user(void) {
   return true;
 }
 
+void launch_app(char* name) {
+  SEND_STRING(SS_LALT(SS_TAP(X_SPACE)));
+  wait_ms(100);
+  send_string(name);
+  SEND_STRING(SS_TAP(X_ENTER));
+}
+
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
   switch (keycode) {
 
@@ -315,7 +324,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
       if (record->event.pressed) {
         switch (detected_host_os()) {
           case OS_WINDOWS:
-            SEND_STRING(SS_LGUI("r"));
+            SEND_STRING(SS_TAP(X_LGUI));
             wait_ms(100);
             SEND_STRING("wezterm" SS_TAP(X_ENTER));
             break;
@@ -329,42 +338,32 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
       }
       return false;
     case CLAUDE:
-      // open EXISTING claude session. if no existing , make new one
+      // open EXISTING claude session. if no existing , launch new one
       if (record->event.pressed) {
-        SEND_STRING(SS_LALT(SS_TAP(X_SPACE)));
-        wait_ms(100);
-        SEND_STRING("claude" SS_TAP(X_ENTER));
+        launch_app("claude");
       }
       return false;
     case FILES:
-      // open EXISTING file explorer. if no existing , make new one
+      // open EXISTING file explorer. if no existing , launch new one
       if (record->event.pressed) {
-        SEND_STRING(SS_LALT(SS_TAP(X_SPACE)));
-        wait_ms(100);
-        SEND_STRING("file explorer" SS_TAP(X_ENTER));
+        launch_app("file explorer");
       }
       return false;
     case SPOTIFY:
-      // open EXISTING spotify. if no existing , make new one
+      // open EXISTING spotify. if no existing , launch new one
       if (record->event.pressed) {
-        SEND_STRING(SS_LALT(SS_TAP(X_SPACE)));
-        wait_ms(100);
-        SEND_STRING("spotify" SS_TAP(X_ENTER));
+        launch_app("spotify");
       }
       return false;
     case BROWSER:
-      // open EXISTING browser. if no existing , make new one
+      // open EXISTING browser. if no existing , launch new one
       if (record->event.pressed) {
         switch (detected_host_os()) {
           case OS_LINUX:
-            SEND_STRING(SS_LALT(SS_TAP(X_SPACE)));
-            wait_ms(100);
-            SEND_STRING("falkon" SS_TAP(X_ENTER));
+            launch_app("falkon");
             break;
           case OS_WINDOWS:
-            SEND_STRING(SS_LALT(SS_TAP(X_SPACE)));
-            wait_ms(100);
-            SEND_STRING("chrome" SS_TAP(X_ENTER));
+            launch_app("chrome");
             break;
           default:
             break;
@@ -372,6 +371,14 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         SEND_STRING(SS_LALT(SS_TAP(X_SPACE)));
         wait_ms(100);
         SEND_STRING("spotify" SS_TAP(X_ENTER));
+      }
+      return false;
+    case DISCORD:
+      // open EXISTING discord. if no existing , launch new one
+      if (record->event.pressed) {
+        SEND_STRING(SS_LALT(SS_TAP(X_SPACE)));
+        wait_ms(100);
+        SEND_STRING("discord" SS_TAP(X_ENTER));
       }
       return false;
 
