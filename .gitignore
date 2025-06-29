@@ -5,3 +5,5 @@
 .build/
 build.log
 qmk_path.txt
+idea.txt
+compile_commands.json
