@@ -244,6 +244,7 @@ bool rgb_matrix_indicators_user(void) {
   return true;
 }
 
+// find an existing window running "name" app or launch new one if none found.
 void launch_app(char* name) {
   SEND_STRING(SS_LALT(SS_TAP(X_SPACE)));
   wait_ms(100);
