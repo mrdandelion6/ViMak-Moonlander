@@ -6,15 +6,22 @@
 
 enum custom_keycodes {
   RGB_SLD = ML_SAFE_RANGE,
-  ST_MACRO_0,
-  ST_MACRO_1,
-  ST_MACRO_2,
-  ST_MACRO_3,
-  ST_MACRO_4,
-  ST_MACRO_5,
-  ST_MACRO_6,
-  ST_MACRO_7,
-  ST_MACRO_8,
+  WIN_LEFT,
+  WIN_RIGHT,
+  WIN_UP,
+  WIN_DOWN,
+  COPY,
+  PASTE,
+  RECORD,
+  CLIP,
+  FUZZY_FIND,
+  SNIP_SCREEN,
+  LOCK_SYSTEM,
+  TERMINAL,
+  CLAUDE,
+  FILES,
+  SPOTIFY,
+  BROWSER,
 };
 
 enum tap_dance_codes {
@@ -39,19 +46,21 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     KC_M,           KC_H,           KC_COMMA,       KC_DOT,         KC_BSLS,        KC_RIGHT_CTRL,
 
     KC_LEFT_ALT,    KC_TRANSPARENT, KC_TRANSPARENT, KC_SCLN,        KC_DELETE,
-    TD(DANCE_0), // left thumb
+    LT(5,3), // left thumb
 
     TD(DANCE_1), // right thumb
     KC_SLASH,       KC_COLN,        KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT,
 
-    KC_SPACE,       KC_BSPC,        LT(4,KC_TAB),
-    KC_RIGHT_ALT,   MT(MOD_RSFT, KC_CAPS),KC_ENTER
+    KC_SPACE,       KC_BSPC,               LT(4,KC_TAB),
+    KC_RIGHT_ALT,   MT(MOD_RSFT, KC_CAPS), KC_ENTER
   ),
+
+  // qwerty layout
   [1] = LAYOUT_moonlander(
-    KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, TO(0),
+    KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT,
     KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT,
 
-    KC_TRANSPARENT, KC_Q,           KC_W,           KC_E,           KC_R,           KC_T,           KC_TRANSPARENT,
+    KC_TRANSPARENT, KC_Q,           KC_W,           KC_E,           KC_R,           KC_T,           TO(0),
     KC_TRANSPARENT, KC_Y,           KC_U,           KC_I,           KC_O,           KC_P,           KC_TRANSPARENT,
 
     KC_TRANSPARENT, KC_A,           KC_S,           KC_D,           KC_F,           KC_G,           KC_TRANSPARENT,
@@ -69,6 +78,8 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT,
     KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT
   ),
+
+  // special character layout
   [2] = LAYOUT_moonlander(
     KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT,
     KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT,
@@ -80,29 +91,31 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     KC_TRANSPARENT, KC_DQUO,        KC_LCBR,        KC_RCBR,        KC_UNDS,        KC_QUES,        KC_TRANSPARENT,
 
     KC_TRANSPARENT, KC_TRANSPARENT, KC_EXLM,        KC_CIRC,        KC_EQUAL,       KC_TRANSPARENT,
-    KC_TRANSPARENT, KC_LBRC,        KC_RBRC,        KC_GRAVE,       KC_TRANSPARENT, KC_TRANSPARENT,
+    KC_ASTR,        KC_LBRC,        KC_RBRC,        KC_GRAVE,       KC_TRANSPARENT, KC_TRANSPARENT,
 
     KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT,
     TO(0),
 
     KC_TRANSPARENT,
-    KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, 
+    KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT,
 
     KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT,
     KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT
   ),
+
+  // numpad layout
   [3] = LAYOUT_moonlander(
     KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT,
     KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT,
 
-    KC_TRANSPARENT, KC_F1,          KC_F2,          KC_F3,          KC_F4,          KC_F5,          KC_TRANSPARENT,
+    KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT,
     KC_TRANSPARENT, KC_UNDS,        KC_7,           KC_8,           KC_9,           KC_MINUS,       KC_TRANSPARENT,
 
-    KC_TRANSPARENT, KC_F6,          KC_F7,          KC_F8,          KC_F9,          KC_F10,         TO(0),
-    KC_TRANSPARENT, KC_0,           KC_4,           KC_5,           KC_6,           KC_COMMA,       KC_TRANSPARENT,
+    KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT,  TO(0),
+    KC_TRANSPARENT, KC_0,           KC_4,           KC_5,           KC_6,           KC_COMMA,         KC_TRANSPARENT,
 
-    KC_TRANSPARENT, KC_F11,         KC_F12,         KC_F13,         KC_F14,         KC_F15,
-    KC_ASTR,        KC_1,           KC_2,           KC_3,           KC_PLUS,        KC_TRANSPARENT,
+    KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT,
+    KC_TRANSPARENT, KC_1,           KC_2,           KC_3,           KC_PLUS,        KC_TRANSPARENT,
 
     KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT,
     KC_TRANSPARENT,
@@ -113,20 +126,22 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT,
     KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT
   ),
+
+  // navigation layout
   [4] = LAYOUT_moonlander(
     AU_TOGG,        KC_TRANSPARENT,      KC_TRANSPARENT,      KC_TRANSPARENT,      KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT,
     KC_ESCAPE,      KC_TRANSPARENT,      KC_TRANSPARENT,      KC_TRANSPARENT,      KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT,
 
-    MU_TOGG,        KC_TRANSPARENT,      ST_MACRO_0,          KC_TRANSPARENT,      KC_TRANSPARENT, ST_MACRO_1,     KC_TRANSPARENT,
+    MU_TOGG,        KC_TRANSPARENT,      COPY,                KC_TRANSPARENT,      KC_TRANSPARENT, PASTE,          KC_TRANSPARENT,
     KC_TRANSPARENT, KC_MEDIA_PLAY_PAUSE, KC_MEDIA_PREV_TRACK, KC_MEDIA_NEXT_TRACK, KC_AUDIO_MUTE,  KC_TRANSPARENT, KC_TRANSPARENT,
 
     MU_NEXT,        KC_TRANSPARENT,      KC_MS_LEFT,          KC_MS_UP,            KC_MS_DOWN,     KC_MS_RIGHT,    KC_TRANSPARENT,
     KC_TRANSPARENT, KC_LEFT,             KC_DOWN,             KC_UP,               KC_RIGHT,       KC_TRANSPARENT, KC_TRANSPARENT,
 
-    KC_TRANSPARENT,    KC_TRANSPARENT,  KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT,
-    KC_END,            KC_PGDN,         KC_PAGE_UP,     KC_HOME,        KC_TRANSPARENT, KC_TRANSPARENT,
+    KC_TRANSPARENT,  KC_TRANSPARENT,  KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT,
+    KC_END,          KC_PGDN,         KC_PAGE_UP,     KC_HOME,        KC_TRANSPARENT, KC_TRANSPARENT,
 
-    KC_TRANSPARENT,    KC_TRANSPARENT,  KC_TRANSPARENT, KC_MS_BTN2,     KC_MS_BTN1,
+    KC_TRANSPARENT,  KC_TRANSPARENT,  KC_TRANSPARENT, KC_MS_BTN2,     KC_MS_BTN1,
     KC_TRANSPARENT,
 
     TO(0),
@@ -135,15 +150,17 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT,
     KC_TRANSPARENT, KC_WWW_FORWARD, KC_WWW_BACK
   ),
+
+  // system utilites
   [5] = LAYOUT_moonlander(
     KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT,
     KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, QK_BOOT,
 
-    KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, ST_MACRO_2,     ST_MACRO_3,
+    KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, RECORD,         CLIP,
     KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT,
 
-    KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, ST_MACRO_4,     ST_MACRO_5,     ST_MACRO_6,
-    KC_TRANSPARENT, KC_TRANSPARENT, ST_MACRO_7,     ST_MACRO_8,     KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT,
+    KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, FUZZY_FIND,     SNIP_SCREEN,    LOCK_SYSTEM,
+    KC_TRANSPARENT, KC_TRANSPARENT, TERMINAL,       CLAUDE,     KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT,
 
     KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT,
     KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT,
@@ -227,60 +244,146 @@ bool rgb_matrix_indicators_user(void) {
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
   switch (keycode) {
-    case ST_MACRO_0:
-    if (record->event.pressed) {
-      SEND_STRING(SS_LCTL(SS_TAP(X_RIGHT)));
-    }
-    break;
-    case ST_MACRO_1:
-    if (record->event.pressed) {
-      SEND_STRING(SS_LCTL(SS_TAP(X_LEFT)));
-    }
-    break;
-    case ST_MACRO_2:
-    if (record->event.pressed) {
-      SEND_STRING(SS_LALT(SS_TAP(X_F9)));
-    }
-    break;
-    case ST_MACRO_3:
-    if (record->event.pressed) {
-      SEND_STRING(SS_LALT(SS_TAP(X_F10)));
-    }
-    break;
-    case ST_MACRO_4:
-    if (record->event.pressed) {
-      SEND_STRING(SS_LALT(SS_TAP(X_SPACE)));
-    }
-    break;
-    case ST_MACRO_5:
-    if (record->event.pressed) {
-      SEND_STRING(SS_LGUI(SS_LSFT(SS_TAP(X_S))));
-    }
-    break;
-    case ST_MACRO_6:
-    if (record->event.pressed) {
-      SEND_STRING(SS_LGUI(SS_TAP(X_L)));
-    }
-    break;
-    case ST_MACRO_7:
-    if (record->event.pressed) {
-      SEND_STRING(SS_LALT(SS_LCTL(SS_LSFT(SS_TAP(X_V)))));
-    }
-    break;
-    case ST_MACRO_8:
-    if (record->event.pressed) {
-      SEND_STRING(SS_LALT(SS_LCTL(SS_LSFT(SS_TAP(X_C)))));
-    }
-    break;
 
+    // window manipulation
+    case WIN_LEFT:
+      if (record->event.pressed) {
+        SEND_STRING(SS_LGUI(SS_TAP(X_LEFT)));
+      }
+      return false;
+    case WIN_RIGHT:
+      if (record->event.pressed) {
+        SEND_STRING(SS_LGUI(SS_TAP(X_RIGHT)));
+      }
+      return false;
+    case WIN_UP:
+      if (record->event.pressed) {
+        SEND_STRING(SS_LGUI(SS_TAP(X_UP)));
+      }
+      return false;
+    case WIN_DOWN:
+      if (record->event.pressed) {
+        SEND_STRING(SS_LGUI(SS_TAP(X_DOWN)));
+      }
+      return false;
+
+    // vim
+    case COPY:
+      if (record->event.pressed) {
+        SEND_STRING(SS_LCTL(SS_TAP(X_RIGHT)));
+      }
+      return false;
+    case PASTE:
+      if (record->event.pressed) {
+        SEND_STRING(SS_LCTL(SS_TAP(X_LEFT)));
+      }
+      return false;
+
+    // screen tools
+    case RECORD:
+      if (record->event.pressed) {
+        SEND_STRING(SS_LALT(SS_TAP(X_F9)));
+      }
+      return false;
+    case CLIP:
+      if (record->event.pressed) {
+        SEND_STRING(SS_LALT(SS_TAP(X_F10)));
+      }
+      return false;
+    case SNIP_SCREEN:
+      if (record->event.pressed) {
+        SEND_STRING(SS_LGUI(SS_LSFT(SS_TAP(X_S))));
+      }
+      return false;
+
+    // system utils
+    case FUZZY_FIND:
+      if (record->event.pressed) {
+        // alt + space: powertoys on windows or krunner on arch kde
+        SEND_STRING(SS_LALT(SS_TAP(X_SPACE)));
+      }
+      return false;
+    case LOCK_SYSTEM:
+      if (record->event.pressed) {
+        SEND_STRING(SS_LGUI(SS_TAP(X_L)));
+      }
+      return false;
+
+    // launch apps
+    case TERMINAL:
+      // open a NEW terminal
+      if (record->event.pressed) {
+        switch (detected_host_os()) {
+          case OS_WINDOWS:
+            SEND_STRING(SS_LGUI("r"));
+            wait_ms(100);
+            SEND_STRING("wezterm" SS_TAP(X_ENTER));
+            break;
+          case OS_LINUX:
+            // ctrl + alt + t
+            SEND_STRING(SS_LCTL(SS_LALT(SS_TAP(X_T))));
+            break;
+          default:
+            break;
+        }
+      }
+      return false;
+    case CLAUDE:
+      // open EXISTING claude session. if no existing , make new one
+      if (record->event.pressed) {
+        SEND_STRING(SS_LALT(SS_TAP(X_SPACE)));
+        wait_ms(100);
+        SEND_STRING("claude" SS_TAP(X_ENTER));
+      }
+      return false;
+    case FILES:
+      // open EXISTING file explorer. if no existing , make new one
+      if (record->event.pressed) {
+        SEND_STRING(SS_LALT(SS_TAP(X_SPACE)));
+        wait_ms(100);
+        SEND_STRING("file explorer" SS_TAP(X_ENTER));
+      }
+      return false;
+    case SPOTIFY:
+      // open EXISTING spotify. if no existing , make new one
+      if (record->event.pressed) {
+        SEND_STRING(SS_LALT(SS_TAP(X_SPACE)));
+        wait_ms(100);
+        SEND_STRING("spotify" SS_TAP(X_ENTER));
+      }
+      return false;
+    case BROWSER:
+      // open EXISTING browser. if no existing , make new one
+      if (record->event.pressed) {
+        switch (detected_host_os()) {
+          case OS_LINUX:
+            SEND_STRING(SS_LALT(SS_TAP(X_SPACE)));
+            wait_ms(100);
+            SEND_STRING("falkon" SS_TAP(X_ENTER));
+            break;
+          case OS_WINDOWS:
+            SEND_STRING(SS_LALT(SS_TAP(X_SPACE)));
+            wait_ms(100);
+            SEND_STRING("chrome" SS_TAP(X_ENTER));
+            break;
+          default:
+            break;
+        }
+        SEND_STRING(SS_LALT(SS_TAP(X_SPACE)));
+        wait_ms(100);
+        SEND_STRING("spotify" SS_TAP(X_ENTER));
+      }
+      return false;
+
+    // other
     case RGB_SLD:
-        if (rawhid_state.rgb_control) {
-            return false;
-        }
-        if (record->event.pressed) {
-            rgblight_mode(1);
-        }
+      if (rawhid_state.rgb_control) {
         return false;
+      }
+      if (record->event.pressed) {
+        rgblight_mode(1);
+      }
+      return false;
   }
   return true;
 }
