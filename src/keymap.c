@@ -2,6 +2,7 @@
 #include "version.h"
 #define MOON_LED_LEVEL LED_LEVEL
 #define ML_SAFE_RANGE SAFE_RANGE
+#define HOLD_ON_OTHER_KEY_PRESS
 
 enum custom_keycodes {
   RGB_SLD = ML_SAFE_RANGE,
@@ -20,16 +21,19 @@ enum tap_dance_codes {
   DANCE_0,
   DANCE_1,
 };
-const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
-  [0] = LAYOUT_moonlander(
-    KC_ESCAPE,      KC_1,           KC_2,           KC_3,           KC_4,           KC_5,           TO(1),
-    KC_TRANSPARENT, KC_6,           KC_7,           KC_8,           KC_9,           KC_0,           KC_TRANSPARENT,
 
-    KC_TRANSPARENT, KC_Q,           KC_W,           KC_F,           KC_P,           KC_B,           KC_TRANSPARENT,
+const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
+
+  // colemak layout
+  [0] = LAYOUT_moonlander(
+    KC_F1,          KC_F2,          KC_F3,          KC_F4,          KC_F5,          KC_F6,          KC_F7,
+    KC_F8,          KC_F9,          KC_F10,         KC_F11,         KC_F12,         KC_F13,         KC_F14,
+
+    KC_TRANSPARENT, KC_Q,           KC_W,           KC_F,           KC_P,           KC_B,           TO(1),
     KC_TRANSPARENT, KC_J,           KC_L,           KC_U,           KC_Y,           KC_MINUS,       KC_TRANSPARENT,
 
     KC_LEFT_SHIFT,  KC_A,           KC_R,           KC_S,           KC_T,           KC_G,           TO(3),
-    KC_TRANSPARENT, KC_K,           KC_N,           KC_E,           KC_I,           KC_O,           MT(MOD_LGUI, KC_QUOTE),
+    KC_TRANSPARENT, KC_K,           KC_N,           KC_E,           KC_I,           KC_O,           KC_QUOTE,
 
     KC_LEFT_CTRL,   KC_Z,           KC_X,           KC_C,           KC_D,           KC_V,
     KC_M,           KC_H,           KC_COMMA,       KC_DOT,         KC_BSLS,        KC_RIGHT_CTRL,
