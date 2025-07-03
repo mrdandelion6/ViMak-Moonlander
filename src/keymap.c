@@ -1,4 +1,5 @@
 #include "quantum.h"
+#include "send_string_keycodes.h"
 #include QMK_KEYBOARD_H
 #include "version.h"
 #define MOON_LED_LEVEL LED_LEVEL
@@ -27,8 +28,18 @@ enum custom_keycodes {
 };
 
 enum tap_dance_codes {
-  DANCE_0,
-  DANCE_1,
+  ESC_VIM,
+  MEDIA,
+  VOLUME,
+};
+
+enum LAYERS {
+  CMK,
+  QTY,
+  SPL,
+  NUM,
+  VIM,
+  APP,
 };
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
@@ -41,8 +52,8 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     KC_TRANSPARENT, KC_Q,           KC_W,           KC_F,           KC_P,           KC_B,           TO(1),
     KC_TRANSPARENT, KC_J,           KC_L,           KC_U,           KC_Y,           KC_MINUS,       KC_TRANSPARENT,
 
-    KC_LEFT_SHIFT,  KC_A,           KC_R,           KC_S,           KC_T,           KC_G,           TO(3),
-    KC_TRANSPARENT, KC_K,           KC_N,           KC_E,           KC_I,           KC_O,           KC_QUOTE,
+    KC_LEFT_SHIFT,  KC_A,           KC_R,           KC_S,           KC_T,           KC_G,           LT(NUM, TO_NUM),
+    LT(NUM, TO_NUM),KC_K,           KC_N,           KC_E,           KC_I,           KC_O,           KC_QUOTE,
 
     KC_LEFT_CTRL,   KC_Z,           KC_X,           KC_C,           KC_D,           KC_V,
     KC_M,           KC_H,           KC_COMMA,       KC_DOT,         KC_BSLS,        KC_RIGHT_CTRL,
@@ -254,6 +265,13 @@ void launch_app(char* name) {
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
   switch (keycode) {
+
+    // layer swapping
+    case TO_NUM:
+      if (record->event.pressed) {
+        layer_move(NUM);
+      }
+      return false;
 
     // window manipulation
     case WIN_LEFT:
