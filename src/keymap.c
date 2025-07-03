@@ -396,96 +396,90 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
   return true;
 }
 
-
-typedef struct {
-    bool is_press_action;
-    uint8_t step;
-} tap;
-
 enum {
-    SINGLE_TAP = 1,
-    SINGLE_HOLD,
-    DOUBLE_TAP,
-    DOUBLE_HOLD,
-    DOUBLE_SINGLE_TAP,
-    MORE_TAPS
+  SINGLE_TAP = 1,
+  SINGLE_HOLD,
+  DOUBLE_TAP,
+  DOUBLE_HOLD,
+  TRIPLE_TAP,
+  MORE_TAPS
 };
 
-static tap dance_state[2];
-
-uint8_t dance_step(tap_dance_state_t *state);
-
 uint8_t dance_step(tap_dance_state_t *state) {
-    if (state->count == 1) {
-        if (state->interrupted || !state->pressed) return SINGLE_TAP;
-        else return SINGLE_HOLD;
-    } else if (state->count == 2) {
-        if (state->interrupted) return DOUBLE_SINGLE_TAP;
-        else if (state->pressed) return DOUBLE_HOLD;
-        else return DOUBLE_TAP;
-    }
-    return MORE_TAPS;
+  if (state->count == 1) {
+    if (state->interrupted || !state->pressed) return SINGLE_TAP;
+    else return SINGLE_HOLD;
+  } else if (state->count == 2) {
+    if (state->pressed) return DOUBLE_HOLD;
+    else return DOUBLE_TAP;
+  } else if (state->count == 3) return TRIPLE_TAP;
+  return MORE_TAPS;
 }
 
+void esc_vim_finished(tap_dance_state_t *state, void *user_data) {
 
-void dance_0_finished(tap_dance_state_t *state, void *user_data);
-void dance_0_reset(tap_dance_state_t *state, void *user_data);
+   // disable caps whenver this button is pressed
+  if (host_keyboard_led_state().caps_lock) {
+    tap_code(KC_CAPS);
+  }
 
-void dance_0_finished(tap_dance_state_t *state, void *user_data) {
-    dance_state[0].step = dance_step(state);
-    switch (dance_state[0].step) {
-        case SINGLE_TAP: layer_move(2); break;
-        case SINGLE_HOLD: layer_on(5); break;
-        case DOUBLE_TAP: layer_move(2); break;
-        case DOUBLE_SINGLE_TAP: layer_move(2); break;
-    }
+  uint8_t step = dance_step(state);
+  switch (step) {
+    // escape
+    case SINGLE_TAP: tap_code16(KC_ESCAPE); break;
+    case SINGLE_HOLD: tap_code16(KC_ESCAPE); break;
+
+    // vim mode
+    case DOUBLE_TAP: layer_move(VIM); break;
+    case DOUBLE_HOLD: layer_move(VIM); break;
+  }
+
 }
 
-void dance_0_reset(tap_dance_state_t *state, void *user_data) {
-    wait_ms(10);
-    switch (dance_state[0].step) {
-        case SINGLE_HOLD:
-          layer_off(5);
-        break;
-    }
-    dance_state[0].step = 0;
-}
-void on_dance_1(tap_dance_state_t *state, void *user_data);
-void dance_1_finished(tap_dance_state_t *state, void *user_data);
-void dance_1_reset(tap_dance_state_t *state, void *user_data);
+void media_finished(tap_dance_state_t *state, void *user_data) {
+  uint8_t step = dance_step(state);
+  switch (step) {
 
-void on_dance_1(tap_dance_state_t *state, void *user_data) {
-    if(state->count == 3) {
-        tap_code16(KC_ESCAPE);
-        tap_code16(KC_ESCAPE);
-        tap_code16(KC_ESCAPE);
-    }
-    if(state->count > 3) {
-        tap_code16(KC_ESCAPE);
-    }
+    // play or pause
+    case SINGLE_TAP: tap_code16(KC_MPLY); break;
+
+    // next in track
+    case DOUBLE_TAP: tap_code16(KC_MNXT); break;
+
+    // previous in track
+    case TRIPLE_TAP: tap_code16(KC_MPRV); break;
+    default: break;
+  }
 }
 
-void dance_1_finished(tap_dance_state_t *state, void *user_data) {
-    dance_state[1].step = dance_step(state);
-    switch (dance_state[1].step) {
-        case SINGLE_TAP: register_code16(KC_ESCAPE); break;
-        case SINGLE_HOLD: layer_move(4); break;
-        case DOUBLE_TAP: register_code16(KC_ESCAPE); register_code16(KC_ESCAPE); break;
-        case DOUBLE_SINGLE_TAP: tap_code16(KC_ESCAPE); register_code16(KC_ESCAPE);
-    }
+void volume_finished(tap_dance_state_t *state, void *user_data) {
+  uint8_t step = dance_step(state);
+  switch (step) {
+
+    // volume up
+    case SINGLE_TAP: tap_code16(KC_VOLU); break;
+    case SINGLE_HOLD: register_code16(KC_VOLU); break;
+
+    // volume down
+    case DOUBLE_HOLD: register_code16(KC_VOLD); break;
+
+    // mute
+    case DOUBLE_TAP: tap_code16(KC_MUTE); break;
+    default: break;
+  }
 }
 
-void dance_1_reset(tap_dance_state_t *state, void *user_data) {
-    wait_ms(10);
-    switch (dance_state[1].step) {
-        case SINGLE_TAP: unregister_code16(KC_ESCAPE); break;
-        case DOUBLE_TAP: unregister_code16(KC_ESCAPE); break;
-        case DOUBLE_SINGLE_TAP: unregister_code16(KC_ESCAPE); break;
-    }
-    dance_state[1].step = 0;
+void volume_reset(tap_dance_state_t *state, void* user_data) {
+  uint8_t step = dance_step(state);
+  switch (step) {
+    case SINGLE_HOLD: unregister_code16(KC_VOLU); break;
+    case DOUBLE_HOLD: unregister_code16(KC_VOLD); break;
+    default: break;
+  }
 }
 
 tap_dance_action_t tap_dance_actions[] = {
-        [DANCE_0] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, dance_0_finished, dance_0_reset),
-        [DANCE_1] = ACTION_TAP_DANCE_FN_ADVANCED(on_dance_1, dance_1_finished, dance_1_reset),
+  [ESC_VIM] = ACTION_TAP_DANCE_FN(esc_vim_finished),
+  [MEDIA] = ACTION_TAP_DANCE_FN(media_finished),
+  [VOLUME] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, volume_finished, volume_reset),
 };
