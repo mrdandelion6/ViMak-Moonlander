@@ -32,3 +32,37 @@ qmk flash ../build/zsa_moonlander_vimak.bin
 QMK will say "Please reset your keyboard into bootloader mode now!" , this is when you need to put the keyboard in bootloader mode. To put your keyboard in bootloader mode press the reset button on your clipboard. It might be in the top left of the left half , and you will likely need a paper clip.
 
 After the keyboard is in bootloader mode , it will let QMK flash it automatically. After flashing , the keyboard should restart on its won and be ready for use.
+
+## Debugging
+If you want to debug the layout with print statements , you will need to set `CONSOLE_ENABLE=true` in `rules.mk`. Then you can use `hid_listen` in terminal and any time your print statements are trigerred , it will print them. Note , you will need to use `uprintf` instead of `printf`.
+
+`hid_listen` comes installed with `qmk` CLI on Ubuntu , but on Arch you need to install `hid_listen`:
+```bash
+# on arch
+yay -S hid_listen
+```
+
+## TODO
+Here is a TODO for layers and RGB.
+
+### RGB
+- CMK: pink purple wave
+- QTY: red orange wave
+- SYM: purple pink red orange wave
+- NUM: pink red wave
+- VIM: blue purple wave
+- APP: teal blue wave
+
+### CMK
+- add win key on both sides
+
+### NUM
+- add alt f4 shortcut on left side
+
+### VIM
+Set the following vim binds:
+- y, Y, yy
+- p, pp
+- w, b, j
+- gg, G
+- ctrl d, ctrl u
