@@ -54,7 +54,6 @@ Here is a TODO for layers and RGB.
 - APP: teal blue wave
 
 ### CMK
-- add win key on both sides
 
 ### NUM
 - add alt f4 shortcut on left side
