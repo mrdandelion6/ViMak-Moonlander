@@ -36,6 +36,9 @@ enum custom_keycodes {
 enum tap_dance_codes {
   MEDIA,
   VOLUME,
+  NUM_TOGGLE,
+  SYM_APP_TOGGLE,
+  TD_COUNT,
 };
 
 enum LAYERS {
