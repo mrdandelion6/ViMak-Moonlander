@@ -6,7 +6,7 @@ This is a keyboard layout for using Colemak-DH and Neovim on the ZSA Moolander. 
 Use the documentation at [https://docs.qmk.fm/](https://docs.qmk.fm/#/newbs_getting_started?id=set-up-your-environment) to set up your environment for building your firmware. Don't run `qmk setup`.
 
 ### Get ZSA's QMK Firmware
-You need to build your layout against [https://github.com/zsa/qmk_firmware/](https://github.com/zsa/qmk_firmware/) which is ZSA's QMK fork (instead of qmk/qmk_firmware). This is what Oryx (ZSA's graphical configurator) uses, so it's guaranteed to work. A common place is just `~/qmk_firmware/`. Run the command below:
+You need to build your layout against [https://github.com/zsa/qmk_firmware/](https://github.com/zsa/qmk_firmware/) which is ZSA's QMK fork (instead of qmk/qmk_firmware). This is what Oryx (ZSA's graphical configurator) uses, so it's guaranteed to work. Run the following command to set QMK to point to ZSA's firmware:
 ```bash
 # choose a place to clone , e.g. ~/qmk_firmware
 qmk setup zsa/qmk_firmware -b firmware24 -H ~/qmk_firmware
