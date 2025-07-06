@@ -476,8 +476,8 @@ uint8_t dance_step(tap_dance_state_t *state) {
 }
 
 void media_finished(tap_dance_state_t *state, void *user_data) {
-  uint8_t step = dance_step(state);
-  switch (step) {
+  dance_states[MEDIA] = dance_step(state);
+  switch (dance_states[MEDIA]) {
 
     // play or pause
     case SINGLE_TAP: tap_code16(KC_MPLY); break;
@@ -492,8 +492,8 @@ void media_finished(tap_dance_state_t *state, void *user_data) {
 }
 
 void volume_finished(tap_dance_state_t *state, void *user_data) {
-  uint8_t step = dance_step(state);
-  switch (step) {
+  dance_states[VOLUME] = dance_step(state);
+  switch (dance_states[VOLUME]) {
 
     // volume up
     case SINGLE_TAP: tap_code16(KC_VOLU); break;
@@ -509,8 +509,7 @@ void volume_finished(tap_dance_state_t *state, void *user_data) {
 }
 
 void volume_reset(tap_dance_state_t *state, void* user_data) {
-  uint8_t step = dance_step(state);
-  switch (step) {
+  switch (dance_states[VOLUME]) {
     case SINGLE_HOLD: unregister_code16(KC_VOLU); break;
     case DOUBLE_HOLD: unregister_code16(KC_VOLD); break;
     default: break;
