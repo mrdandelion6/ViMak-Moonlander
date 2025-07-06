@@ -1,5 +1,5 @@
 # ViMak Moonlander
-This is a keyboard layout for using Colemak-DH and Neovim on the ZSA Moolander.
+This is a keyboard layout for using Colemak-DH and Neovim on the ZSA Moolander. Here is the config I use for Neovim: [six.nvim](https://github.com/mrdandelion6/six.nvim)
 
 ## Setting up QMK Software
 ### Set up QMK Environment
