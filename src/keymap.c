@@ -1,6 +1,9 @@
 #include "process_tap_dance.h"
 #include "quantum.h"
+#include "quantum_keycodes.h"
 #include "send_string_keycodes.h"
+#include "timer.h"
+#include <stdint.h>
 #include QMK_KEYBOARD_H
 #include "version.h"
 #define MOON_LED_LEVEL LED_LEVEL
@@ -13,8 +16,8 @@ enum custom_keycodes {
   WIN_RIGHT,
   WIN_UP,
   WIN_DOWN,
-  COPY,
-  PASTE,
+  FORWARD_WORD,
+  BACKWARD_WORD,
   RECORD,
   CLIP,
   FUZZY_FIND,
@@ -26,11 +29,12 @@ enum custom_keycodes {
   SPOTIFY,
   BROWSER,
   DISCORD,
-  TO_NUM,
+  ESC_MACRO,
+  ESC_VIM,
+  ESC_VIM,
 };
 
 enum tap_dance_codes {
-  ESC_VIM,
   MEDIA,
   VOLUME,
 };
@@ -38,7 +42,7 @@ enum tap_dance_codes {
 enum LAYERS {
   CMK,
   QTY,
-  SPL,
+  SYM,
   NUM,
   VIM,
   APP,
@@ -54,16 +58,16 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     KC_TRANSPARENT, KC_Q,           KC_W,           KC_F,           KC_P,           KC_B,           TO(QTY),
     KC_TRANSPARENT, KC_J,           KC_L,           KC_U,           KC_Y,           KC_MINUS,       KC_TRANSPARENT,
 
-    KC_LEFT_SHIFT,  KC_A,           KC_R,           KC_S,           KC_T,           KC_G,           LT(NUM, TO_NUM),
-    LT(NUM, TO_NUM),KC_K,           KC_N,           KC_E,           KC_I,           KC_O,           KC_QUOTE,
+    KC_LEFT_SHIFT,  KC_A,           KC_R,           KC_S,           KC_T,           KC_G,           TD(NUM_TOGGLE),
+    TD(NUM_TOGGLE), KC_K,           KC_N,           KC_E,           KC_I,           KC_O,           KC_QUOTE,
 
     KC_LEFT_CTRL,   KC_Z,           KC_X,           KC_C,           KC_D,           KC_V,
     KC_M,           KC_H,           KC_COMMA,       KC_DOT,         KC_BSLS,        KC_RIGHT_CTRL,
 
     KC_LEFT_ALT,    KC_TRANSPARENT, KC_TRANSPARENT, KC_SCLN,        KC_DELETE,
-    LT(APP, SPL), // left thumb
+    TD(SYM_APP_TOGGLE), // left thumb
 
-    TD(ESC_VIM), // right thumb
+    ESC_MACRO, // right thumb
     KC_SLASH,       KC_COLN,        KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT,
 
     KC_SPACE,       KC_BSPC,               LT(VIM,KC_TAB),
@@ -95,7 +99,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   ),
 
   // special character layout
-  [SPL] = LAYOUT_moonlander(
+  [SYM] = LAYOUT_moonlander(
     KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT,
     KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT,
 
