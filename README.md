@@ -53,11 +53,6 @@ Here is a TODO for layers and RGB.
 - VIM: blue purple wave
 - APP: teal blue wave
 
-### CMK
-
-### NUM
-- add alt f4 shortcut on left side
-
 ### VIM
 Set the following vim binds:
 - y, Y, yy

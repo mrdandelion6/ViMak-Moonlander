@@ -1,4 +1,5 @@
 #include "action_layer.h"
+#include "keycodes.h"
 #include "process_tap_dance.h"
 #include "quantum.h"
 #include "quantum_keycodes.h"
@@ -31,6 +32,7 @@ enum custom_keycodes {
   BROWSER,
   DISCORD,
   ESC_MACRO,
+  ALT_F4,
 };
 
 enum tap_dance_codes {
@@ -129,7 +131,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT,
     KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT,
 
-    KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, TD(MEDIA),      TD(VOLUME),     KC_TRANSPARENT, KC_TRANSPARENT,
+    KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, TD(MEDIA),      TD(VOLUME),     ALT_F4,         KC_TRANSPARENT,
     KC_TRANSPARENT, KC_DOT,         KC_7,           KC_8,           KC_9,           KC_MINUS,       KC_TRANSPARENT,
 
     KC_TRANSPARENT, KC_TRANSPARENT, WIN_LEFT,       WIN_UP,         WIN_DOWN,       WIN_RIGHT,      TO(CMK),
@@ -301,6 +303,11 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     case WIN_DOWN:
       if (record->event.pressed) {
         SEND_STRING(SS_LGUI(SS_TAP(X_DOWN)));
+      }
+      return false;
+    case ALT_F4:
+      if (record->event.pressed) {
+        SEND_STRING(SS_LALT(SS_TAP(X_F4)));
       }
       return false;
 
