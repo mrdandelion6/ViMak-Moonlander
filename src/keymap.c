@@ -1,3 +1,4 @@
+#include "action_layer.h"
 #include "process_tap_dance.h"
 #include "quantum.h"
 #include "quantum_keycodes.h"
@@ -30,8 +31,6 @@ enum custom_keycodes {
   BROWSER,
   DISCORD,
   ESC_MACRO,
-  ESC_VIM,
-  ESC_VIM,
 };
 
 enum tap_dance_codes {
@@ -271,11 +270,13 @@ void launch_app(char* name) {
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
   switch (keycode) {
 
-    // layer swapping
-    case TO_NUM:
-      if (record->event.pressed) {
-        layer_move(NUM);
+    // general
+    case ESC_MACRO:
+      // disable caps whenever this button is pressed
+      if (host_keyboard_led_state().caps_lock) {
+        tap_code(KC_CAPS);
       }
+      tap_code16(KC_ESCAPE);
       return false;
 
     // window manipulation
