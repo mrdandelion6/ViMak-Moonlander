@@ -429,35 +429,50 @@ enum {
   MORE_TAPS
 };
 
+static uint8_t dance_states[TD_COUNT];
+
+// tweak this as you want , it helps to do some experimentation with uprintf
+#define MIN_HOLD_TIME 150
+static uint16_t td_press_timer = 0;
+static bool td_timer_active = false;
+
 uint8_t dance_step(tap_dance_state_t *state) {
   if (state->count == 1) {
-    if (state->interrupted || !state->pressed) return SINGLE_TAP;
-    else return SINGLE_HOLD;
-  } else if (state->count == 2) {
+
+    if (!state->pressed) {
+      td_timer_active = false;
+      return SINGLE_TAP;
+    }
+
+    // if we got interrupted while pressing , either ya boy is typing too fast
+    // or he genuinely meant to launch an app. must check how long pressed.
+    if (state->interrupted) {
+      if (td_timer_active) {
+
+        // check elapsed time
+        uint16_t held_time = timer_elapsed(td_press_timer);
+        td_timer_active = false;
+        if (held_time > MIN_HOLD_TIME) {
+          return SINGLE_HOLD;
+        }
+
+      }
+      return SINGLE_TAP;
+    } else {
+      return SINGLE_HOLD;
+    }
+  }
+
+  // move this into other counts if we ever want to check time for them
+  td_timer_active = false;
+
+  if (state->count == 2) {
     if (state->pressed) return DOUBLE_HOLD;
     else return DOUBLE_TAP;
-  } else if (state->count == 3) return TRIPLE_TAP;
+  }
+
+  if (state->count == 3) return TRIPLE_TAP;
   return MORE_TAPS;
-}
-
-void esc_vim_finished(tap_dance_state_t *state, void *user_data) {
-
-   // disable caps whenver this button is pressed
-  if (host_keyboard_led_state().caps_lock) {
-    tap_code(KC_CAPS);
-  }
-
-  uint8_t step = dance_step(state);
-  switch (step) {
-    // escape
-    case SINGLE_TAP: tap_code16(KC_ESCAPE); break;
-    case SINGLE_HOLD: tap_code16(KC_ESCAPE); break;
-
-    // vim mode
-    case DOUBLE_TAP: layer_move(VIM); break;
-    case DOUBLE_HOLD: layer_move(VIM); break;
-  }
-
 }
 
 void media_finished(tap_dance_state_t *state, void *user_data) {
