@@ -516,8 +516,57 @@ void volume_reset(tap_dance_state_t *state, void* user_data) {
   }
 }
 
+static uint8_t prev_layer;
+
+void hold_toggle_layer(int layer) {
+  prev_layer = get_highest_layer(layer_state);
+  layer_move(layer);
+}
+
+void hold_layer_reset(uint8_t step) {
+  if (step == SINGLE_HOLD) {
+    uint8_t temp = get_highest_layer(layer_state);
+    layer_move(prev_layer);
+    prev_layer = temp;
+  }
+}
+
+void hold_toggle_num(tap_dance_state_t *state, void* user_data) {
+  dance_states[NUM_TOGGLE] = dance_step(state);
+  hold_toggle_layer(NUM);
+}
+
+void hold_toggle_num_reset(tap_dance_state_t *state, void* user_data) {
+  hold_layer_reset(dance_states[NUM_TOGGLE]);
+}
+
+void hold_toggle_sym_app(tap_dance_state_t *state, void* user_data) {
+  dance_states[SYM_APP_TOGGLE] = dance_step(state);
+  switch (dance_states[SYM_APP_TOGGLE]) {
+    case SINGLE_TAP: hold_toggle_layer(SYM); break;
+    case SINGLE_HOLD: hold_toggle_layer(APP); break;
+    default: break;
+  }
+}
+
+void hold_toggle_sym_app_reset(tap_dance_state_t *state, void* user_data) {
+  // if we swapped to VIM layer while holding SYM key , don't swap back to CMK
+  if (get_highest_layer(layer_state) != VIM) {
+    hold_layer_reset(dance_states[SYM_APP_TOGGLE]);
+  }
+}
+
+void time_td(tap_dance_state_t *state, void* user_data) {
+  // start a timer if the state count is 1
+  if (state->count == 1 && state->pressed) {
+    td_timer_active = true;
+    td_press_timer = timer_read();
+  }
+}
+
 tap_dance_action_t tap_dance_actions[] = {
-  [ESC_VIM] = ACTION_TAP_DANCE_FN(esc_vim_finished),
   [MEDIA] = ACTION_TAP_DANCE_FN(media_finished),
   [VOLUME] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, volume_finished, volume_reset),
+  [NUM_TOGGLE] = ACTION_TAP_DANCE_FN_ADVANCED(time_td, hold_toggle_num, hold_toggle_num_reset),
+  [SYM_APP_TOGGLE] = ACTION_TAP_DANCE_FN_ADVANCED(time_td, hold_toggle_sym_app, hold_toggle_sym_app_reset),
 };
