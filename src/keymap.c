@@ -33,6 +33,7 @@ enum custom_keycodes {
   DISCORD,
   ESC_MACRO,
   ALT_F4,
+  VIM_MODE,
 };
 
 enum tap_dance_codes {
@@ -167,7 +168,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     KC_TRANSPARENT,  KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT,
     KC_TRANSPARENT,
 
-    TO(VIM),
+    VIM_MODE,
     KC_AUDIO_VOL_DOWN, KC_AUDIO_VOL_UP, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT,
 
     KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT,
@@ -230,7 +231,7 @@ void set_layer_color(int layer) {
     } else {
       RGB rgb = hsv_to_rgb( hsv );
       float f = (float)rgb_matrix_config.hsv.v / UINT8_MAX;
-      rgb_matrix_set_color( i, f * rgb.r, f * rgb.g, f * rgb.b );   
+      rgb_matrix_set_color( i, f * rgb.r, f * rgb.g, f * rgb.b );
     }
   }
 }
@@ -324,7 +325,6 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
           vim_locked = false;
           layer_move(CMK);
         } else { // lock into VIM mode
-          uprintf("moving to vim layer\n");
           vim_locked = true;
           layer_move(VIM);
         }
@@ -385,9 +385,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
       if (record->event.pressed) {
         switch (detected_host_os()) {
           case OS_WINDOWS:
-            SEND_STRING(SS_TAP(X_LGUI));
-            wait_ms(APP_LAUNCH_TIME);
-            SEND_STRING("wezterm" SS_TAP(X_ENTER));
+            launch_app("wezterm");
             break;
           case OS_LINUX:
             // ctrl + alt + t
@@ -429,17 +427,12 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
           default:
             break;
         }
-        SEND_STRING(SS_LALT(SS_TAP(X_SPACE)));
-        wait_ms(APP_LAUNCH_TIME);
-        SEND_STRING("spotify" SS_TAP(X_ENTER));
       }
       return false;
     case DISCORD:
       // open EXISTING discord. if no existing , launch new one
       if (record->event.pressed) {
-        SEND_STRING(SS_LALT(SS_TAP(X_SPACE)));
-        wait_ms(APP_LAUNCH_TIME);
-        SEND_STRING("discord" SS_TAP(X_ENTER));
+        launch_app("discord");
       }
       return false;
 
