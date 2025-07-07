@@ -280,11 +280,13 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 
     // general
     case ESC_MACRO:
-      // disable caps whenever this button is pressed
-      if (host_keyboard_led_state().caps_lock) {
-        tap_code(KC_CAPS);
+      if (record->event.pressed) {
+        // disable caps whenever this button is pressed
+        if (host_keyboard_led_state().caps_lock) {
+          tap_code(KC_CAPS);
+        }
+        tap_code16(KC_ESCAPE);
       }
-      tap_code16(KC_ESCAPE);
       return false;
 
     // window manipulation
