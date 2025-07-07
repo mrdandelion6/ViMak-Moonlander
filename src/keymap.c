@@ -275,6 +275,7 @@ void launch_app(char* name) {
   SEND_STRING(SS_TAP(X_ENTER));
 }
 
+static bool vim_locked = false;
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
   switch (keycode) {
 
@@ -317,6 +318,26 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
       return false;
 
     // vim
+    case VIM_MODE:
+      if (record->event.pressed) {
+        if (get_highest_layer(layer_state) == VIM && vim_locked) { // toggle back to CMK
+          vim_locked = false;
+          layer_move(CMK);
+        } else { // lock into VIM mode
+          uprintf("moving to vim layer\n");
+          vim_locked = true;
+          layer_move(VIM);
+        }
+      }
+      return false;
+    case LT(VIM,KC_TAB): // when letting go of the temp VIM key
+      if (!record->event.pressed) {
+        if (vim_locked) {
+          return false;
+        }
+      }
+      break;
+
     case FORWARD_WORD:
       if (record->event.pressed) {
         SEND_STRING(SS_LCTL(SS_TAP(X_RIGHT)));
