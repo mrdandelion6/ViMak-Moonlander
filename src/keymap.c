@@ -265,10 +265,13 @@ bool rgb_matrix_indicators_user(void) {
 }
 
 // find an existing window running "name" app or launch new one if none found.
+#define APP_LAUNCH_TIME_PRE 50
+#define APP_LAUNCH_TIME_POST 300
 void launch_app(char* name) {
   SEND_STRING(SS_LALT(SS_TAP(X_SPACE)));
-  wait_ms(100);
+  wait_ms(APP_LAUNCH_TIME_PRE);
   send_string(name);
+  wait_ms(APP_LAUNCH_TIME_POST);
   SEND_STRING(SS_TAP(X_ENTER));
 }
 
@@ -360,7 +363,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         switch (detected_host_os()) {
           case OS_WINDOWS:
             SEND_STRING(SS_TAP(X_LGUI));
-            wait_ms(100);
+            wait_ms(APP_LAUNCH_TIME);
             SEND_STRING("wezterm" SS_TAP(X_ENTER));
             break;
           case OS_LINUX:
@@ -404,7 +407,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             break;
         }
         SEND_STRING(SS_LALT(SS_TAP(X_SPACE)));
-        wait_ms(100);
+        wait_ms(APP_LAUNCH_TIME);
         SEND_STRING("spotify" SS_TAP(X_ENTER));
       }
       return false;
@@ -412,7 +415,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
       // open EXISTING discord. if no existing , launch new one
       if (record->event.pressed) {
         SEND_STRING(SS_LALT(SS_TAP(X_SPACE)));
-        wait_ms(100);
+        wait_ms(APP_LAUNCH_TIME);
         SEND_STRING("discord" SS_TAP(X_ENTER));
       }
       return false;
