@@ -13,7 +13,7 @@ You need to build your layout against [https://github.com/zsa/qmk_firmware/](htt
 # choose a place to clone , e.g. ~/qmk_firmware
 qmk setup zsa/qmk_firmware -b firmware24 -H ~/qmk_firmware
 ```
-This both retrieve's ZSA's firmware from git and tells QMK where it is. Now you're all done with setting up the software.
+The above command both retrieve's ZSA's firmware from git and tells QMK where it is. Now you're all done with setting up the software.
 
 ## Setting up this Repo
 Make a file named `qmk_path.txt` in the root of this repo and edit it to have the actual path pointing to ZSA's `qmk_firmware/` repo (wherever you cloned it).
