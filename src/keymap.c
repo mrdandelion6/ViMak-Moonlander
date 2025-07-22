@@ -585,6 +585,10 @@ void hold_toggle_sym_app_reset(tap_dance_state_t *state, void* user_data) {
   }
 }
 
+/**
+ * @brief This function starts a timer for tap dances which can be used later
+ * to change whether a hold or tap was triggered in the dance_step() function.
+ */
 void time_td(tap_dance_state_t *state, void* user_data) {
   // start a timer if the state count is 1
   if (state->count == 1 && state->pressed) {
