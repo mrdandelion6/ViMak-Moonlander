@@ -578,7 +578,7 @@ void media_finished(tap_dance_state_t *state, void *user_data) {
   }
 }
 
-void volume_finished(tap_dance_state_t *state, void *user_data) {
+void volume_td_fin(tap_dance_state_t *state, void *user_data) {
   dance_states[VOLUME] = dance_step(state);
   switch (dance_states[VOLUME]) {
 
@@ -595,7 +595,7 @@ void volume_finished(tap_dance_state_t *state, void *user_data) {
   }
 }
 
-void volume_reset(tap_dance_state_t *state, void* user_data) {
+void volume_td_reset(tap_dance_state_t *state, void* user_data) {
   switch (dance_states[VOLUME]) {
     case SINGLE_HOLD: unregister_code16(KC_VOLU); break;
     case DOUBLE_HOLD: unregister_code16(KC_VOLD); break;
@@ -618,16 +618,16 @@ void hold_layer_reset(uint8_t step) {
   }
 }
 
-void hold_toggle_num(tap_dance_state_t *state, void* user_data) {
+void num_layer_td_fin(tap_dance_state_t *state, void* user_data) {
   dance_states[NUM_TOGGLE] = dance_step(state);
   hold_toggle_layer(NUM);
 }
 
-void hold_toggle_num_reset(tap_dance_state_t *state, void* user_data) {
+void num_layer_reset(tap_dance_state_t *state, void* user_data) {
   hold_layer_reset(dance_states[NUM_TOGGLE]);
 }
 
-void hold_toggle_sym_app(tap_dance_state_t *state, void* user_data) {
+void sym_app_layer_td_fin(tap_dance_state_t *state, void* user_data) {
   dance_states[SYM_APP_TOGGLE] = dance_step(state);
   switch (dance_states[SYM_APP_TOGGLE]) {
     case SINGLE_TAP: hold_toggle_layer(SYM); break;
@@ -636,11 +636,14 @@ void hold_toggle_sym_app(tap_dance_state_t *state, void* user_data) {
   }
 }
 
-void hold_toggle_sym_app_reset(tap_dance_state_t *state, void* user_data) {
+void sym_app_layer_td_reset(tap_dance_state_t *state, void* user_data) {
   // if we swapped to VIM layer while holding SYM key , don't swap back to CMK
   if (get_highest_layer(layer_state) != VIM) {
     hold_layer_reset(dance_states[SYM_APP_TOGGLE]);
   }
+}
+
+void shift_caps_td_fin(tap_dance_state_t *state, void* user_data) {
 }
 
 /**
@@ -657,7 +660,8 @@ void time_td(tap_dance_state_t *state, void* user_data) {
 
 tap_dance_action_t tap_dance_actions[] = {
   [MEDIA] = ACTION_TAP_DANCE_FN(media_finished),
-  [VOLUME] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, volume_finished, volume_reset),
-  [NUM_TOGGLE] = ACTION_TAP_DANCE_FN_ADVANCED(time_td, hold_toggle_num, hold_toggle_num_reset),
-  [SYM_APP_TOGGLE] = ACTION_TAP_DANCE_FN_ADVANCED(time_td, hold_toggle_sym_app, hold_toggle_sym_app_reset),
+  [VOLUME] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, volume_td_fin, volume_td_reset),
+  [NUM_TOGGLE] = ACTION_TAP_DANCE_FN_ADVANCED(time_td, num_layer_td_fin, num_layer_reset),
+  [SYM_APP_TOGGLE] = ACTION_TAP_DANCE_FN_ADVANCED(time_td, sym_app_layer_td_fin, sym_app_layer_td_reset),
+  [SHIFT_CAPS] = ACTION_TAP_DANCE_FN(shift_caps_td_fin),
 };
