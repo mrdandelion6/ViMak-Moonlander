@@ -174,7 +174,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     VIM_MODE,
     KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,
 
-    KC_NO, KC_NO, KC_NO, // without this , CMK's LT(VIM,KC_TAB) causes problems
+    KC_NO, KC_NO, KC_NO,
     KC_NO, KC_NO, KC_NO
   ),
 
