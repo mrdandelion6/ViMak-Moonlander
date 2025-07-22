@@ -1,3 +1,4 @@
+#include "action.h"
 #include "action_layer.h"
 #include "keycodes.h"
 #include "matrix.h"
@@ -42,6 +43,7 @@ enum tap_dance_codes {
   VOLUME,
   NUM_TOGGLE,
   SYM_APP_TOGGLE,
+  SHIFT_CAPS,
   TD_COUNT,
 };
 
@@ -619,13 +621,58 @@ void volume_td_reset(tap_dance_state_t *state, void* user_data) {
   }
 }
 
+/// @brief The previous layer we were on.
 static uint8_t prev_layer;
 
-void hold_toggle_layer(int layer) {
+/**
+ * @brief This function acts as a wrapper around layer_move() while also keeping
+ * track of the layer we are switching away from.
+ *
+ * Called by *_layer_td_fin functions.
+ */
+void layer_move_tracked(int layer) {
   prev_layer = get_highest_layer(layer_state);
   layer_move(layer);
 }
 
+void num_layer_td_fin(tap_dance_state_t *state, void* user_data) {
+  dance_states[NUM_TOGGLE] = dance_step(state);
+  layer_move_tracked(NUM);
+}
+
+void sym_app_layer_td_fin(tap_dance_state_t *state, void* user_data) {
+  dance_states[SYM_APP_TOGGLE] = dance_step(state);
+  switch (dance_states[SYM_APP_TOGGLE]) {
+    case SINGLE_TAP: layer_move_tracked(SYM); break;
+    case SINGLE_HOLD: layer_move_tracked(APP); break;
+    default: break;
+  }
+}
+
+/**
+ * @brief Simple tap dance that sends CAPS if key pressed once , or holds down
+ * SHIFT otherewise. Interrupts immediately trigger hold (no td_timer).
+ */
+void shift_caps_td_fin(tap_dance_state_t *state, void* user_data) {
+  dance_states[SHIFT_CAPS] = dance_step(state);
+  switch (dance_states[SHIFT_CAPS]) {
+    case SINGLE_TAP:
+      tap_code16(KC_CAPS);
+      break;
+    case SINGLE_HOLD:
+      register_code16(KC_LEFT_SHIFT);
+      break;
+    default:
+      break;
+  }
+}
+
+/**
+ * @brief This function swaps back to prev_layer if the stored tap dance step
+ * was a single hold.
+ *
+ * Called by *_layer_td_reset functions.
+ */
 void hold_layer_reset(uint8_t step) {
   if (step == SINGLE_HOLD) {
     uint8_t temp = get_highest_layer(layer_state);
@@ -634,22 +681,8 @@ void hold_layer_reset(uint8_t step) {
   }
 }
 
-void num_layer_td_fin(tap_dance_state_t *state, void* user_data) {
-  dance_states[NUM_TOGGLE] = dance_step(state);
-  hold_toggle_layer(NUM);
-}
-
 void num_layer_reset(tap_dance_state_t *state, void* user_data) {
   hold_layer_reset(dance_states[NUM_TOGGLE]);
-}
-
-void sym_app_layer_td_fin(tap_dance_state_t *state, void* user_data) {
-  dance_states[SYM_APP_TOGGLE] = dance_step(state);
-  switch (dance_states[SYM_APP_TOGGLE]) {
-    case SINGLE_TAP: hold_toggle_layer(SYM); break;
-    case SINGLE_HOLD: hold_toggle_layer(APP); break;
-    default: break;
-  }
 }
 
 void sym_app_layer_td_reset(tap_dance_state_t *state, void* user_data) {
@@ -659,7 +692,10 @@ void sym_app_layer_td_reset(tap_dance_state_t *state, void* user_data) {
   }
 }
 
-void shift_caps_td_fin(tap_dance_state_t *state, void* user_data) {
+void shift_caps_td_reset(tap_dance_state_t *state, void* user_data) {
+  if (dance_states[SHIFT_CAPS] == SINGLE_HOLD) {
+    unregister_code16(KC_LEFT_SHIFT);
+  }
 }
 
 /**
@@ -679,5 +715,5 @@ tap_dance_action_t tap_dance_actions[] = {
   [VOLUME] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, volume_td_fin, volume_td_reset),
   [NUM_TOGGLE] = ACTION_TAP_DANCE_FN_ADVANCED(time_td, num_layer_td_fin, num_layer_reset),
   [SYM_APP_TOGGLE] = ACTION_TAP_DANCE_FN_ADVANCED(time_td, sym_app_layer_td_fin, sym_app_layer_td_reset),
-  [SHIFT_CAPS] = ACTION_TAP_DANCE_FN(shift_caps_td_fin),
+  [SHIFT_CAPS] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, shift_caps_td_fin, shift_caps_td_reset)
 };
