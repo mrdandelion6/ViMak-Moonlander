@@ -1,5 +1,6 @@
 #include "action_layer.h"
 #include "keycodes.h"
+#include "matrix.h"
 #include "process_tap_dance.h"
 #include "quantum.h"
 #include "quantum_keycodes.h"
@@ -75,8 +76,8 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     ESC_MACRO, // right thumb
     KC_SLASH,       KC_COLN,        KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT,
 
-    KC_SPACE,       KC_BSPC,               LT(VIM,KC_TAB),
-    KC_RIGHT_ALT,   MT(MOD_RSFT, KC_CAPS), KC_ENTER
+    KC_SPACE,       KC_BSPC,        LT(VIM,KC_TAB),
+    KC_RIGHT_ALT,   TD(SHIFT_CAPS), KC_ENTER
   ),
 
   // qwerty layout
@@ -276,7 +277,54 @@ void launch_app(char* name) {
   SEND_STRING(SS_TAP(X_ENTER));
 }
 
-static bool vim_locked = false;
+/**
+ * @brief True when we swap into VIM layer fully , not just when LT is held ,
+ * otherwise false. Set in process_record_user().
+ */
+static bool toggled_in_vim = false;
+
+/**
+ * @brief True when the FORWARD_WORD macro on the VIM layer is held down. Set in
+ * process_record_user() and used in matrix_scan_user() to repeatedly send the
+ * forward movement key stroke: CTRL + RIGHT ARROW.
+ */
+static bool forward_word_held = false;
+
+/// @brief Same as forward_world_held but for BACKWORD_WORD macro.
+static bool backward_word_held = false;
+
+/**
+ * @brief Timer for the FORWARD_WORD macro which is used to determine when to
+ * send the next forward movement key stroke in matrix_scan_user() while holding
+ * the macro down.
+ */
+static uint16_t forward_word_timer = 0;
+
+/// @brief Same as forward_world_held but for BACKWORD_WORD macro.
+static uint16_t backward_word_timer = 0;
+
+/**
+ * @brief How often (in milliseconds) to send a macro key while holding it down.
+ * Used for macros such as the ones on the VIM layer like FORWARD_WORD.
+ */
+#define REPEAT_HOLD_EVERY 150
+
+/**
+ * @brief Called every matrix scan cycle (~1000 times per second) for custom
+ * user logic. Use timers to throttle expensive operations - avoid blocking
+ * code.
+ */
+void matrix_scan_user(void) {
+  if (forward_word_held && timer_elapsed(forward_word_timer) > REPEAT_HOLD_EVERY) {
+    SEND_STRING(SS_LCTL(SS_TAP(X_RIGHT)));
+    forward_word_timer = timer_read();
+  }
+  if (backward_word_held && timer_elapsed(backward_word_timer) > REPEAT_HOLD_EVERY) {
+    SEND_STRING(SS_LCTL(SS_TAP(X_LEFT)));
+    forward_word_timer = timer_read();
+  }
+}
+
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
   switch (keycode) {
 
@@ -321,18 +369,18 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     // vim
     case VIM_MODE:
       if (record->event.pressed) {
-        if (get_highest_layer(layer_state) == VIM && vim_locked) { // toggle back to CMK
-          vim_locked = false;
+        if (get_highest_layer(layer_state) == VIM && toggled_in_vim) { // toggle back to CMK
+          toggled_in_vim = false;
           layer_move(CMK);
         } else { // lock into VIM mode
-          vim_locked = true;
+          toggled_in_vim = true;
           layer_move(VIM);
         }
       }
       return false;
     case LT(VIM,KC_TAB): // when letting go of the temp VIM key
       if (!record->event.pressed) {
-        if (vim_locked) {
+        if (toggled_in_vim) {
           return false;
         }
       }
@@ -340,12 +388,22 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 
     case FORWARD_WORD:
       if (record->event.pressed) {
+        backward_word_held = false;
+        forward_word_held = true;
+        forward_word_timer = timer_read();
         SEND_STRING(SS_LCTL(SS_TAP(X_RIGHT)));
+      } else {
+        forward_word_held = false;
       }
       return false;
     case BACKWARD_WORD:
       if (record->event.pressed) {
+        forward_word_held = false;
+        backward_word_held = true;
+        backward_word_timer = timer_read();
         SEND_STRING(SS_LCTL(SS_TAP(X_LEFT)));
+      } else {
+        backward_word_held = false;
       }
       return false;
 
