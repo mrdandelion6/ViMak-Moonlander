@@ -516,13 +516,32 @@ enum {
   MORE_TAPS
 };
 
+/**
+ * @brief This is a very important global array that keeps track of the dance
+ * states for difference tap dances. This is needed particularly for when we
+ * have a *_td_reset function that needs to remember what step was found in the
+ * corresponding *_td_fin function.
+ */
 static uint8_t dance_states[TD_COUNT];
 
 // tweak this as you want , it helps to do some experimentation with uprintf
-#define MIN_HOLD_TIME 150
+#define MIN_HOLD_TIME 130
 static uint16_t td_press_timer = 0;
 static bool td_timer_active = false;
 
+/**
+ * @brief This function processes tap dance states and how they should be
+ * interpreted as.
+ *
+ * Normally , interrupted presses are counted as holds by the HOLD_ON_KEY_PRESS
+ * macro. However , when td_timer_active is true , this function may count
+ * interrupted presses as just a tap if the interrupted key was not held down
+ * for long enough (MIN_HOLD_TIME). This is only when td_timer_active is true ,
+ * as that is the case for tap dances where I find myself typing too fast and
+ * unintentionally causing an app to launch. For example , pressing pressing SYM
+ * and immediately pressing { before SYM releases , triggering an accidental app
+ * launch for terminal , when I just meant to go to previous paragraph in Vim.
+ */
 uint8_t dance_step(tap_dance_state_t *state) {
   if (state->count == 1) {
 
@@ -531,23 +550,20 @@ uint8_t dance_step(tap_dance_state_t *state) {
       return SINGLE_TAP;
     }
 
-    // if we got interrupted while pressing , either ya boy is typing too fast
-    // or he genuinely meant to launch an app. must check how long pressed.
-    if (state->interrupted) {
-      if (td_timer_active) {
+    // for timed dances , check if key was held for long enough , otherwise tap
+    if (state->interrupted && td_timer_active) {
 
-        // check elapsed time
         uint16_t held_time = timer_elapsed(td_press_timer);
         td_timer_active = false;
-        if (held_time > MIN_HOLD_TIME) {
-          return SINGLE_HOLD;
+
+        if (held_time < MIN_HOLD_TIME) {
+          return SINGLE_TAP;
         }
 
-      }
-      return SINGLE_TAP;
-    } else {
-      return SINGLE_HOLD;
     }
+
+    // either have an uninterrupted hold , or interrupted late enough
+    return SINGLE_HOLD;
   }
 
   // move this into other counts if we ever want to check time for them
