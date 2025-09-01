@@ -239,33 +239,89 @@ void set_layer_color(int layer) {
   }
 }
 
+#define SPECTRUM_SPEED 9 // higher is faster
+#define LIGHT_PINK_HUE 234   // light pink approaching red (~330 deg)
+#define DARK_PURPLE_HUE 170  // dark purple approaching blue (~240 deg)
+
+// sine lookup table for smooth wave effects (64 values covering 0-255 range)
+static const uint8_t PROGMEM sine_table[64] = {
+    128, 140, 152, 164, 175, 186, 197, 207,
+    216, 225, 233, 240, 246, 251, 255, 255,
+    255, 251, 246, 240, 233, 225, 216, 207,
+    197, 186, 175, 164, 152, 140, 128, 115,
+    103, 91, 80, 69, 58, 48, 39, 30,
+    22, 15, 9, 4, 0, 4, 9, 15,
+    22, 30, 39, 48, 58, 69, 80, 91,
+    103, 115, 128, 140, 152, 164, 175, 186
+};
+
+// sine lookup function
+static uint8_t sin8_lookup(uint8_t theta) {
+    return pgm_read_byte(&sine_table[theta >> 2]); // divide by 4 to map 0-255 to 0-63
+}
+
+// add this function before rgb_matrix_indicators_user()
+void set_pink_purple_spectrum(void) {
+    static uint8_t time = 0;
+    time += SPECTRUM_SPEED;
+
+    for (int i = 0; i < RGB_MATRIX_LED_COUNT; i++) {
+        // create a wave effect that flows across the keyboard
+        uint8_t wave_offset = (i * 12);  // tighter wave spacing for faster movement
+        uint8_t wave_position = time + wave_offset;
+
+        // use sine wave to determine position in color spectrum
+        uint8_t wave_value = sin8_lookup(wave_position);
+
+        // map wave to expanded hue range (dark purple-blue to light pink-red)
+        uint8_t hue_range = LIGHT_PINK_HUE - DARK_PURPLE_HUE;
+        uint8_t hue = DARK_PURPLE_HUE + ((wave_value * hue_range) >> 8);
+
+        // keep brightness constant and high for vibrant colors
+        uint8_t brightness = 220;
+
+        HSV hsv = {
+            .h = hue,
+            .s = 255,  // full saturation for vivid colors
+            .v = brightness
+        };
+
+        RGB rgb = hsv_to_rgb(hsv);
+        float f = (float)rgb_matrix_config.hsv.v / UINT8_MAX;
+        rgb_matrix_set_color(i, f * rgb.r, f * rgb.g, f * rgb.b);
+    }
+}
+
 bool rgb_matrix_indicators_user(void) {
-  if (rawhid_state.rgb_control) {
-      return false;
-  }
-  if (keyboard_config.disable_layer_led) { return false; }
-  switch (biton32(layer_state)) {
-    case 1:
-      set_layer_color(1);
-      break;
-    case 2:
-      set_layer_color(2);
-      break;
-    case 3:
-      set_layer_color(3);
-      break;
-    case 4:
-      set_layer_color(4);
-      break;
-    case 5:
-      set_layer_color(5);
-      break;
-   default:
-    if (rgb_matrix_get_flags() == LED_FLAG_NONE)
-      rgb_matrix_set_color_all(0, 0, 0);
-    break;
-  }
-  return true;
+    if (rawhid_state.rgb_control) {
+        return false;
+    }
+    if (keyboard_config.disable_layer_led) { 
+        return false; 
+    }
+
+    switch (biton32(layer_state)) {
+        case 1:
+            set_layer_color(1);
+            break;
+        case 2:
+            set_layer_color(2);
+            break;
+        case 3:
+            set_layer_color(3);
+            break;
+        case 4:
+            set_layer_color(4);
+            break;
+        case 5:
+            set_layer_color(5);
+            break;
+        default:
+            // use pink-purple spectrum for base layer instead of off
+            set_pink_purple_spectrum();
+            break;
+    }
+    return true;
 }
 
 // find an existing window running "name" app or launch new one if none found.
