@@ -64,7 +64,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     KC_F8,          KC_F9,          KC_F10,         KC_F11,         KC_F12,         KC_F13,         KC_F14,
 
     KC_LGUI,        KC_Q,           KC_W,           KC_F,           KC_P,           KC_B,           TO(QTY),
-    KC_TRANSPARENT, KC_J,           KC_L,           KC_U,           KC_Y,           KC_MINUS,       KC_RGUI,
+    KC_TRANSPARENT, KC_J,           KC_L,           KC_U,           KC_Y,           KC_PSCR,        KC_RGUI,
 
     KC_LEFT_SHIFT,  KC_A,           KC_R,           KC_S,           KC_T,           KC_G,           TD(NUM_TOGGLE),
     TD(NUM_TOGGLE), KC_K,           KC_N,           KC_E,           KC_I,           KC_O,           KC_QUOTE,
