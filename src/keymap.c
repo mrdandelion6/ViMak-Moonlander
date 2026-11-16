@@ -344,132 +344,6 @@ void launch_app(char* name) {
   wait_ms(APP_LAUNCH_TIME_POST);
   SEND_STRING(SS_TAP(X_ENTER));
 }
-/**
- * @brief True when the FORWARD_WORD macro on the VIM layer is held down. Set in
- * process_record_user() and used in matrix_scan_user() to repeatedly send the
- * forward movement key stroke: CTRL + RIGHT ARROW.
- */
-static bool forward_word_held = false;
-
-/// @brief Same as forward_world_held but for BACKWORD_WORD macro.
-static bool backward_word_held = false;
-
-/**
- * @brief Timer for the FORWARD_WORD macro which is used to determine when to
- * send the next forward movement key stroke in matrix_scan_user() while holding
- * the macro down.
- */
-static uint16_t forward_word_timer = 0;
-
-/// @brief Same as forward_world_held but for BACKWORD_WORD macro.
-static uint16_t backward_word_timer = 0;
-
-/**
- * @brief How often (in milliseconds) to send a macro key while holding it down.
- * Used for macros such as the ones on the VIM layer like FORWARD_WORD.
- */
-#define REPEAT_HOLD_EVERY 150
-
-/**
- * @brief Called every matrix scan cycle (~1000 times per second) for custom
- * user logic. Use timers to throttle expensive operations - avoid blocking
- * code.
- */
-void matrix_scan_user(void) {
-  if (forward_word_held && timer_elapsed(forward_word_timer) > REPEAT_HOLD_EVERY) {
-    SEND_STRING(SS_LCTL(SS_TAP(X_RIGHT)));
-    forward_word_timer = timer_read();
-  }
-  if (backward_word_held && timer_elapsed(backward_word_timer) > REPEAT_HOLD_EVERY) {
-    SEND_STRING(SS_LCTL(SS_TAP(X_LEFT)));
-    forward_word_timer = timer_read();
-  }
-}
-/**
- * @brief True when the FORWARD_WORD macro on the VIM layer is held down. Set in
- * process_record_user() and used in matrix_scan_user() to repeatedly send the
- * forward movement key stroke: CTRL + RIGHT ARROW.
- */
-static bool forward_word_held = false;
-
-/// @brief Same as forward_world_held but for BACKWORD_WORD macro.
-static bool backward_word_held = false;
-
-/**
- * @brief Timer for the FORWARD_WORD macro which is used to determine when to
- * send the next forward movement key stroke in matrix_scan_user() while holding
- * the macro down.
- */
-static uint16_t forward_word_timer = 0;
-
-/// @brief Same as forward_world_held but for BACKWORD_WORD macro.
-static uint16_t backward_word_timer = 0;
-
-/**
- * @brief How often (in milliseconds) to send a macro key while holding it down.
- * Used for macros such as the ones on the VIM layer like FORWARD_WORD.
- */
-#define REPEAT_HOLD_EVERY 150
-
-/**
- * @brief Called every matrix scan cycle (~1000 times per second) for custom
- * user logic. Use timers to throttle expensive operations - avoid blocking
- * code.
- */
-void matrix_scan_user(void) {
-  if (forward_word_held && timer_elapsed(forward_word_timer) > REPEAT_HOLD_EVERY) {
-    SEND_STRING(SS_LCTL(SS_TAP(X_RIGHT)));
-    forward_word_timer = timer_read();
-  }
-  if (backward_word_held && timer_elapsed(backward_word_timer) > REPEAT_HOLD_EVERY) {
-    SEND_STRING(SS_LCTL(SS_TAP(X_LEFT)));
-    forward_word_timer = timer_read();
-  }
-}
-/**
- * @brief True when the FORWARD_WORD macro on the VIM layer is held down. Set in
- * process_record_user() and used in matrix_scan_user() to repeatedly send the
- * forward movement key stroke: CTRL + RIGHT ARROW.
- */
-static bool forward_word_held = false;
-
-/// @brief Same as forward_world_held but for BACKWORD_WORD macro.
-static bool backward_word_held = false;
-
-/**
- * @brief Timer for the FORWARD_WORD macro which is used to determine when to
- * send the next forward movement key stroke in matrix_scan_user() while holding
- * the macro down.
- */
-static uint16_t forward_word_timer = 0;
-
-/// @brief Same as forward_world_held but for BACKWORD_WORD macro.
-static uint16_t backward_word_timer = 0;
-
-/**
- * @brief How often (in milliseconds) to send a macro key while holding it down.
- * Used for macros such as the ones on the VIM layer like FORWARD_WORD.
- */
-#define REPEAT_HOLD_EVERY 150
-
-/**
- * @brief Called every matrix scan cycle (~1000 times per second) for custom
- * user logic. Use timers to throttle expensive operations - avoid blocking
- * code.
- */
-void matrix_scan_user(void) {
-  if (forward_word_held && timer_elapsed(forward_word_timer) > REPEAT_HOLD_EVERY) {
-    SEND_STRING(SS_LCTL(SS_TAP(X_RIGHT)));
-    forward_word_timer = timer_read();
-  }
-  if (backward_word_held && timer_elapsed(backward_word_timer) > REPEAT_HOLD_EVERY) {
-    SEND_STRING(SS_LCTL(SS_TAP(X_LEFT)));
-    forward_word_timer = timer_read();
-  }
-}
-  wait_ms(APP_LAUNCH_TIME_POST);
-  SEND_STRING(SS_TAP(X_ENTER));
-}
 
 /**
  * @brief True when we swap into VIM layer fully , not just when LT is held ,
@@ -549,24 +423,22 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
       }
       break;
 
+    // hold CTRL + ARROW down while the key is held , so the OS key repeat
+    // handles holding (same delay and speed as holding w / b in vim).
     case FORWARD_WORD:
       if (record->event.pressed) {
-        backward_word_held = false;
-        forward_word_held = true;
-        forward_word_timer = timer_read();
-        SEND_STRING(SS_LCTL(SS_TAP(X_RIGHT)));
+        unregister_code16(LCTL(KC_LEFT));
+        register_code16(LCTL(KC_RIGHT));
       } else {
-        forward_word_held = false;
+        unregister_code16(LCTL(KC_RIGHT));
       }
       return false;
     case BACKWARD_WORD:
       if (record->event.pressed) {
-        forward_word_held = false;
-        backward_word_held = true;
-        backward_word_timer = timer_read();
-        SEND_STRING(SS_LCTL(SS_TAP(X_LEFT)));
+        unregister_code16(LCTL(KC_RIGHT));
+        register_code16(LCTL(KC_LEFT));
       } else {
-        backward_word_held = false;
+        unregister_code16(LCTL(KC_LEFT));
       }
       return false;
 
