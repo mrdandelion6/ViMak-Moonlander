@@ -41,7 +41,6 @@ enum custom_keycodes {
 enum tap_dance_codes {
   MEDIA,
   VOLUME,
-  NUM_TOGGLE,
   SHIFT_CAPS,
   TD_COUNT,
 };
@@ -64,6 +63,13 @@ enum LAYERS {
  */
 #define SYM_APP LT(APP, KC_F24)
 
+/**
+ * @brief Inner column keys. Tap to lock into NUM , hold to momentarily use NUM.
+ * Same PERMISSIVE_HOLD setup as SYM_APP. KC_F23 is a placeholder , the tap is
+ * intercepted in process_record_user().
+ */
+#define NUM_TG LT(NUM, KC_F23)
+
 void layer_move_tracked(int layer);
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
@@ -76,8 +82,8 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     KC_LGUI,        KC_Q,           KC_W,           KC_F,           KC_P,           KC_B,           TO(QTY),
     KC_TRANSPARENT, KC_J,           KC_L,           KC_U,           KC_Y,           KC_PSCR,        KC_RGUI,
 
-    KC_LEFT_SHIFT,  KC_A,           KC_R,           KC_S,           KC_T,           KC_G,           TD(NUM_TOGGLE),
-    TD(NUM_TOGGLE), KC_K,           KC_N,           KC_E,           KC_I,           KC_O,           KC_QUOTE,
+    KC_LEFT_SHIFT,  KC_A,           KC_R,           KC_S,           KC_T,           KC_G,           NUM_TG,
+    NUM_TG,         KC_K,           KC_N,           KC_E,           KC_I,           KC_O,           KC_QUOTE,
 
     KC_LEFT_CTRL,   KC_Z,           KC_X,           KC_C,           KC_D,           KC_V,
     KC_M,           KC_H,           KC_COMMA,       KC_DOT,         KC_BSLS,        KC_RIGHT_CTRL,
@@ -405,6 +411,16 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         }
       }
       return false;
+    case NUM_TG:
+      // tap: lock into NUM. hold: let LT momentarily turn on the NUM layer.
+      if (record->tap.count) {
+        if (record->event.pressed) {
+          layer_move_tracked(NUM);
+        }
+        return false;
+      }
+      break;
+
     case SYM_APP:
       // tap: lock into SYM. hold: let LT momentarily turn on the APP layer.
       if (record->tap.count) {
@@ -575,7 +591,7 @@ static bool td_timer_active = false;
  * as that is the case for tap dances where I find myself typing too fast and
  * unintentionally causing an app to launch. For example , pressing pressing SYM
  * and immediately pressing { before SYM releases , triggering an accidental app
- * launch. (The SYM / APP key no longer uses this , see SYM_APP.)
+ * launch. (SYM / APP and NUM no longer use this , see SYM_APP and NUM_TG.)
  */
 uint8_t dance_step(tap_dance_state_t *state) {
   if (state->count == 1) {
@@ -668,11 +684,6 @@ void layer_move_tracked(int layer) {
   layer_move(layer);
 }
 
-void num_layer_td_fin(tap_dance_state_t *state, void* user_data) {
-  dance_states[NUM_TOGGLE] = dance_step(state);
-  layer_move_tracked(NUM);
-}
-
 /**
  * @brief Simple tap dance that sends CAPS if key pressed once , or holds down
  * SHIFT otherewise. Interrupts immediately trigger hold (no td_timer).
@@ -705,10 +716,6 @@ void hold_layer_reset(uint8_t step) {
   }
 }
 
-void num_layer_reset(tap_dance_state_t *state, void* user_data) {
-  hold_layer_reset(dance_states[NUM_TOGGLE]);
-}
-
 void shift_caps_td_reset(tap_dance_state_t *state, void* user_data) {
   if (dance_states[SHIFT_CAPS] == SINGLE_HOLD) {
     unregister_code16(KC_LEFT_SHIFT);
@@ -730,7 +737,6 @@ void time_td(tap_dance_state_t *state, void* user_data) {
 tap_dance_action_t tap_dance_actions[] = {
   [MEDIA] = ACTION_TAP_DANCE_FN(media_finished),
   [VOLUME] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, volume_td_fin, volume_td_reset),
-  [NUM_TOGGLE] = ACTION_TAP_DANCE_FN_ADVANCED(time_td, num_layer_td_fin, num_layer_reset),
   [SHIFT_CAPS] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, shift_caps_td_fin, shift_caps_td_reset)
 };
 
@@ -742,6 +748,7 @@ tap_dance_action_t tap_dance_actions[] = {
 bool get_permissive_hold(uint16_t keycode, keyrecord_t *record) {
   switch (keycode) {
     case SYM_APP:
+    case NUM_TG:
     case LT(VIM,KC_TAB):
       return true;
     default:
