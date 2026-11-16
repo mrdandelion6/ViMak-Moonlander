@@ -1,74 +1,85 @@
-# ViMak Moonlander
+# vimak moonlander
 
-This is a keyboard layout for using Colemak-DH and Neovim on the ZSA Moolander. Here is the config I use for Neovim: [six.nvim](https://github.com/mrdandelion6/six.nvim)
+this is a keyboard layout for using colemak-dh and neovim on the zsa moolander. here is the config i use for neovim: [six.nvim](https://github.com/mrdandelion6/six.nvim)
 
-## Setting up QMK Software
+## setting up qmk software
 
-### Set up QMK Environment
+### set up qmk environment
 
-Use the documentation at [https://docs.qmk.fm/](https://docs.qmk.fm/#/newbs_getting_started?id=set-up-your-environment) to set up your environment for building your firmware. Don't run `qmk setup`.
+use the documentation at [https://docs.qmk.fm/](https://docs.qmk.fm/#/newbs_getting_started?id=set-up-your-environment) to set up your environment for building your firmware. don't run `qmk setup`.
 
-Afterwards , clone this repository anywhere you want.
+afterwards , clone this repository anywhere you want.
 
-### Get ZSA's QMK Firmware
+### get zsa's qmk firmware
 
-You need to build your layout against [https://github.com/zsa/qmk_firmware/](https://github.com/zsa/qmk_firmware/) which is ZSA's QMK fork (instead of qmk/qmk_firmware). This is what Oryx (ZSA's graphical configurator) uses, so it's guaranteed to work. Run the following command to set QMK to point to ZSA's firmware:
+you need to build your layout against [https://github.com/zsa/qmk_firmware/](https://github.com/zsa/qmk_firmware/) which is zsa's qmk fork (instead of qmk/qmk_firmware). this is what oryx (zsa's graphical configurator) uses, so it's guaranteed to work. run the following command to set qmk to point to zsa's firmware:
 
 ```bash
 # choose a place to clone , e.g. ~/qmk_firmware
 qmk setup zsa/qmk_firmware -b firmware24 -H ~/qmk_firmware
 ```
 
-The above command both retrieve's ZSA's firmware from git and tells QMK where it is. Now you're all done with setting up the software.
+the above command both retrieve's zsa's firmware from git and tells qmk where it is. now you're all done with setting up the software.
 
-## Setting up this Repo
+## setting up this repo
 
-Make a file named `qmk_path.txt` in the root of this repo and edit it to have the actual path pointing to ZSA's `qmk_firmware/` repo (wherever you cloned it).
+make a file named `qmk_path.txt` in the root of this repo and edit it to have the actual path pointing to zsa's `qmk_firmware/` repo (wherever you cloned it).
 
 ```bash
 # change to the path where you cloned
 echo "~/qmk_firmware/" > qmk_path.txt
 ```
 
-## Compiling
+## compiling
 
-Simply run `make` from the `src/` directory after finishing set up. If you have any dependency issues , follow the instructions from the error messages and fix it. The binary will be generated and move to the `build/` dir.
+simply run `make` from the `src/` directory after finishing set up. if you have any dependency issues , follow the instructions from the error messages and fix it. the binary will be generated and move to the `build/` dir.
 
-## Flashing
+## flashing
 
-Now flash to your keyboard , first attempt to flash the binary:
+now flash to your keyboard , first attempt to flash the binary:
 
 ```bash
 # from src/
 qmk flash ../build/zsa_moonlander_vimak.bin
 ```
 
-QMK will say "Please reset your keyboard into bootloader mode now!" , this is when you need to put the keyboard in bootloader mode. To put your keyboard in bootloader mode press the reset button on your clipboard. It might be in the top left of the left half , and you will likely need a paper clip.
+qmk will say "Please reset your keyboard into bootloader mode now!" , this is when you need to put the keyboard in bootloader mode. to put your keyboard in bootloader mode press the reset button on your clipboard. it might be in the top left of the left half , and you will likely need a paper clip.
 
-After the keyboard is in bootloader mode , it will let QMK flash it automatically. After flashing , the keyboard should restart on its won and be ready for use.
+after the keyboard is in bootloader mode , it will let qmk flash it automatically. after flashing , the keyboard should restart on its won and be ready for use.
 
-## Debugging
+## debugging
 
-If you want to debug the layout with print statements , you will need to set `CONSOLE_ENABLE=true` in `rules.mk`. Then you can use `hid_listen` in terminal and any time your print statements are trigerred , it will print them. Note , you will need to use `uprintf` instead of `printf`.
+if you want to debug the layout with print statements , you will need to set `CONSOLE_ENABLE=true` in `rules.mk`. then you can use `hid_listen` in terminal and any time your print statements are trigerred , it will print them. note , you will need to use `uprintf` instead of `printf`.
 
-`hid_listen` comes installed with `qmk` CLI on Ubuntu , but on Arch you need to install `hid_listen`:
+`hid_listen` comes installed with `qmk` cli on ubuntu , but on arch you need to install `hid_listen`:
 
 ```bash
 # on arch
 yay -S hid_listen
 ```
 
-If you want to just what keys are being pressed before your desktop intercepts them , you can do so with `evtest`.
+if you want to just what keys are being pressed before your desktop intercepts them , you can do so with `evtest`.
 
 ```sh
 pacman -S evtest
 ```
 
-## TODO
+## fast key presses
 
-Here is a TODO for layers and RGB.
+on the moonlander , tap SYM for symbols and hold it for app shortcuts. `T` is terminal in APP and `{` in SYM. the key released first decides , not speed (qmk permissive hold):
 
-### RGB
+```
+SYM↓ T↓ T↑ SYM↑   ->  terminal
+SYM↓ T↓ SYM↑ T↑   ->  {
+```
+
+making any key pressed during SYM count as a hold would be worse , since fast typing overlaps keys a lot and would keep opening terminals.
+
+## todo
+
+here is a todo for layers and rgb.
+
+### rgb
 
 - CMK: pink purple wave
 - QTY: red orange wave
@@ -77,9 +88,9 @@ Here is a TODO for layers and RGB.
 - VIM: blue purple wave
 - APP: teal blue wave
 
-### VIM
+### vim
 
-Set the following vim binds:
+set the following vim binds:
 
 - y, Y, yy
 - p, pp
