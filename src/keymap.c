@@ -42,7 +42,6 @@ enum tap_dance_codes {
   MEDIA,
   VOLUME,
   NUM_TOGGLE,
-  SYM_APP_TOGGLE,
   SHIFT_CAPS,
   TD_COUNT,
 };
@@ -55,6 +54,17 @@ enum LAYERS {
   VIM,
   APP,
 };
+
+/**
+ * @brief Left thumb key. Tap to lock into SYM , hold to momentarily use APP.
+ * Uses PERMISSIVE_HOLD (see get_permissive_hold()) so that tapping an APP key
+ * while this is held triggers APP immediately , while a fast roll (releasing
+ * this key before the next one) still counts as a tap into SYM. KC_F24 is a
+ * placeholder , the tap is intercepted in process_record_user().
+ */
+#define SYM_APP LT(APP, KC_F24)
+
+void layer_move_tracked(int layer);
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
@@ -73,7 +83,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     KC_M,           KC_H,           KC_COMMA,       KC_DOT,         KC_BSLS,        KC_RIGHT_CTRL,
 
     KC_LEFT_ALT,    KC_TRANSPARENT, KC_TRANSPARENT, KC_SCLN,        KC_DELETE,
-    TD(SYM_APP_TOGGLE), // left thumb
+    SYM_APP, // left thumb
 
     ESC_MACRO, // right thumb
     KC_SLASH,       KC_COLN,        KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT,
@@ -334,13 +344,6 @@ void launch_app(char* name) {
   wait_ms(APP_LAUNCH_TIME_POST);
   SEND_STRING(SS_TAP(X_ENTER));
 }
-
-/**
- * @brief True when we swap into VIM layer fully , not just when LT is held ,
- * otherwise false. Set in process_record_user().
- */
-static bool toggled_in_vim = false;
-
 /**
  * @brief True when the FORWARD_WORD macro on the VIM layer is held down. Set in
  * process_record_user() and used in matrix_scan_user() to repeatedly send the
@@ -382,6 +385,98 @@ void matrix_scan_user(void) {
     forward_word_timer = timer_read();
   }
 }
+/**
+ * @brief True when the FORWARD_WORD macro on the VIM layer is held down. Set in
+ * process_record_user() and used in matrix_scan_user() to repeatedly send the
+ * forward movement key stroke: CTRL + RIGHT ARROW.
+ */
+static bool forward_word_held = false;
+
+/// @brief Same as forward_world_held but for BACKWORD_WORD macro.
+static bool backward_word_held = false;
+
+/**
+ * @brief Timer for the FORWARD_WORD macro which is used to determine when to
+ * send the next forward movement key stroke in matrix_scan_user() while holding
+ * the macro down.
+ */
+static uint16_t forward_word_timer = 0;
+
+/// @brief Same as forward_world_held but for BACKWORD_WORD macro.
+static uint16_t backward_word_timer = 0;
+
+/**
+ * @brief How often (in milliseconds) to send a macro key while holding it down.
+ * Used for macros such as the ones on the VIM layer like FORWARD_WORD.
+ */
+#define REPEAT_HOLD_EVERY 150
+
+/**
+ * @brief Called every matrix scan cycle (~1000 times per second) for custom
+ * user logic. Use timers to throttle expensive operations - avoid blocking
+ * code.
+ */
+void matrix_scan_user(void) {
+  if (forward_word_held && timer_elapsed(forward_word_timer) > REPEAT_HOLD_EVERY) {
+    SEND_STRING(SS_LCTL(SS_TAP(X_RIGHT)));
+    forward_word_timer = timer_read();
+  }
+  if (backward_word_held && timer_elapsed(backward_word_timer) > REPEAT_HOLD_EVERY) {
+    SEND_STRING(SS_LCTL(SS_TAP(X_LEFT)));
+    forward_word_timer = timer_read();
+  }
+}
+/**
+ * @brief True when the FORWARD_WORD macro on the VIM layer is held down. Set in
+ * process_record_user() and used in matrix_scan_user() to repeatedly send the
+ * forward movement key stroke: CTRL + RIGHT ARROW.
+ */
+static bool forward_word_held = false;
+
+/// @brief Same as forward_world_held but for BACKWORD_WORD macro.
+static bool backward_word_held = false;
+
+/**
+ * @brief Timer for the FORWARD_WORD macro which is used to determine when to
+ * send the next forward movement key stroke in matrix_scan_user() while holding
+ * the macro down.
+ */
+static uint16_t forward_word_timer = 0;
+
+/// @brief Same as forward_world_held but for BACKWORD_WORD macro.
+static uint16_t backward_word_timer = 0;
+
+/**
+ * @brief How often (in milliseconds) to send a macro key while holding it down.
+ * Used for macros such as the ones on the VIM layer like FORWARD_WORD.
+ */
+#define REPEAT_HOLD_EVERY 150
+
+/**
+ * @brief Called every matrix scan cycle (~1000 times per second) for custom
+ * user logic. Use timers to throttle expensive operations - avoid blocking
+ * code.
+ */
+void matrix_scan_user(void) {
+  if (forward_word_held && timer_elapsed(forward_word_timer) > REPEAT_HOLD_EVERY) {
+    SEND_STRING(SS_LCTL(SS_TAP(X_RIGHT)));
+    forward_word_timer = timer_read();
+  }
+  if (backward_word_held && timer_elapsed(backward_word_timer) > REPEAT_HOLD_EVERY) {
+    SEND_STRING(SS_LCTL(SS_TAP(X_LEFT)));
+    forward_word_timer = timer_read();
+  }
+}
+  wait_ms(APP_LAUNCH_TIME_POST);
+  SEND_STRING(SS_TAP(X_ENTER));
+}
+
+/**
+ * @brief True when we swap into VIM layer fully , not just when LT is held ,
+ * otherwise false. Set in process_record_user().
+ */
+static bool toggled_in_vim = false;
+
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
   switch (keycode) {
@@ -436,6 +531,16 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         }
       }
       return false;
+    case SYM_APP:
+      // tap: lock into SYM. hold: let LT momentarily turn on the APP layer.
+      if (record->tap.count) {
+        if (record->event.pressed) {
+          layer_move_tracked(SYM);
+        }
+        return false;
+      }
+      break;
+
     case LT(VIM,KC_TAB): // when letting go of the temp VIM key
       if (!record->event.pressed) {
         if (toggled_in_vim) {
@@ -598,7 +703,7 @@ static bool td_timer_active = false;
  * as that is the case for tap dances where I find myself typing too fast and
  * unintentionally causing an app to launch. For example , pressing pressing SYM
  * and immediately pressing { before SYM releases , triggering an accidental app
- * launch for terminal , when I just meant to go to previous paragraph in Vim.
+ * launch. (The SYM / APP key no longer uses this , see SYM_APP.)
  */
 uint8_t dance_step(tap_dance_state_t *state) {
   if (state->count == 1) {
@@ -696,15 +801,6 @@ void num_layer_td_fin(tap_dance_state_t *state, void* user_data) {
   layer_move_tracked(NUM);
 }
 
-void sym_app_layer_td_fin(tap_dance_state_t *state, void* user_data) {
-  dance_states[SYM_APP_TOGGLE] = dance_step(state);
-  switch (dance_states[SYM_APP_TOGGLE]) {
-    case SINGLE_TAP: layer_move_tracked(SYM); break;
-    case SINGLE_HOLD: layer_move_tracked(APP); break;
-    default: break;
-  }
-}
-
 /**
  * @brief Simple tap dance that sends CAPS if key pressed once , or holds down
  * SHIFT otherewise. Interrupts immediately trigger hold (no td_timer).
@@ -741,13 +837,6 @@ void num_layer_reset(tap_dance_state_t *state, void* user_data) {
   hold_layer_reset(dance_states[NUM_TOGGLE]);
 }
 
-void sym_app_layer_td_reset(tap_dance_state_t *state, void* user_data) {
-  // if we swapped to VIM layer while holding SYM key , don't swap back to CMK
-  if (get_highest_layer(layer_state) != VIM) {
-    hold_layer_reset(dance_states[SYM_APP_TOGGLE]);
-  }
-}
-
 void shift_caps_td_reset(tap_dance_state_t *state, void* user_data) {
   if (dance_states[SHIFT_CAPS] == SINGLE_HOLD) {
     unregister_code16(KC_LEFT_SHIFT);
@@ -770,6 +859,20 @@ tap_dance_action_t tap_dance_actions[] = {
   [MEDIA] = ACTION_TAP_DANCE_FN(media_finished),
   [VOLUME] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, volume_td_fin, volume_td_reset),
   [NUM_TOGGLE] = ACTION_TAP_DANCE_FN_ADVANCED(time_td, num_layer_td_fin, num_layer_reset),
-  [SYM_APP_TOGGLE] = ACTION_TAP_DANCE_FN_ADVANCED(time_td, sym_app_layer_td_fin, sym_app_layer_td_reset),
   [SHIFT_CAPS] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, shift_caps_td_fin, shift_caps_td_reset)
 };
+
+/**
+ * @brief Per-key PERMISSIVE_HOLD. When enabled for a dual-role key , pressing
+ * AND releasing another key while it is held counts as a hold , even within
+ * TAPPING_TERM. Rolls (dual-role key released first) still count as taps.
+ */
+bool get_permissive_hold(uint16_t keycode, keyrecord_t *record) {
+  switch (keycode) {
+    case SYM_APP:
+    case LT(VIM,KC_TAB):
+      return true;
+    default:
+      return false;
+  }
+}
